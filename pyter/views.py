@@ -18,6 +18,11 @@ class SituacoesViewSet(viewsets.ModelViewSet):
     serializer_class = SituacoesSerializer
 
 
+class InstituicoesViewSet(viewsets.ModelViewSet):
+    queryset = Instituicoes.objects.all()
+    serializer_class = InstituicoesSerializer
+
+
 class MateriaisViewSet(viewsets.ModelViewSet):
     queryset = Materiais.objects.all()
     serializer_class = MateriaisSerializer

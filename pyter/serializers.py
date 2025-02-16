@@ -17,6 +17,12 @@ class SituacoesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Situacoes
         fields = '__all__'
+    
+
+class InstituicoesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Instituicoes
+        fields = '__all__'
 
 
 class MateriaisSerializer(serializers.ModelSerializer):
