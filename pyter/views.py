@@ -48,10 +48,6 @@ class VariacoesProdutosViewSet(viewsets.ModelViewSet):
     serializer_class = VariacoesProdutosSerializer
 
 
-class ListaVariacoesProduto(generics.ListAPIView):
-    serializer_class = VariacoesProdutosSerializer
-
-    def get_queryset(self):
-        produto_id = self.kwargs['produto_id']
-        queryset = VariacoesProdutos.objects.filter(id_produto=produto_id)
-        return queryset
+class ListaVariacoesDetalhadas(generics.ListAPIView):
+    queryset = VariacoesProdutos.objects.select_related().all()
+    serializer_class = VariacoesDetalhadasSerializer

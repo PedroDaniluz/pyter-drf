@@ -56,3 +56,13 @@ class VariacoesProdutosSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariacoesProdutos
         fields = '__all__'
+
+
+class VariacoesDetalhadasSerializer(serializers.ModelSerializer):
+    produto = serializers.CharField(source='id_produto')
+    categoria = serializers.CharField(source='id_categoria')
+    material = serializers.CharField(source='id_material')
+
+    class Meta:
+        model = VariacoesProdutos
+        fields = '__all__'
