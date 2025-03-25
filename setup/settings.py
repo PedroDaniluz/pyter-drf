@@ -54,7 +54,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",   # IP público do seu servidor
+    "http://localhost:5173",
 ]
 
 ROOT_URLCONF = 'setup.urls'

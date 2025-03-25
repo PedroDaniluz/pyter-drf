@@ -17,5 +17,5 @@ router.register('variacoes', VariacoesProdutosViewSet, basename='variacoes')
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(router.urls)),
-    path('produtos/<int:produto_id>/variacoes/', ListaVariacoesProduto.as_view(), name='variacoes_produto'),
+    path('<int:produto_id>/variacoes/', ListaVariacoesProduto.as_view(), name='variacoes_produto'),
 ]
