@@ -58,7 +58,7 @@ class VariacoesProdutosSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class VariacoesDetalhadasSerializer(serializers.ModelSerializer):
+class ListaVariacoesSerializer(serializers.ModelSerializer):
     produto = serializers.CharField(source='id_produto')
     categoria = serializers.CharField(source='id_categoria')
     material = serializers.CharField(source='id_material')
@@ -66,3 +66,16 @@ class VariacoesDetalhadasSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariacoesProdutos
         fields = '__all__'
+
+
+class ListaPedidosSerializer(serializers.ModelSerializer):
+    situacao = serializers.CharField()
+    cliente = serializers.CharField()
+    data = serializers.DateField()
+    prazo = serializers.DateField()
+    instituicao = serializers.CharField(allow_null=True)
+    valor = serializers.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        model = Pedidos
+        fields = ['id_pedido', 'situacao', 'cliente', 'data', 'prazo', 'instituicao', 'valor']
