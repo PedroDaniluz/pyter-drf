@@ -79,3 +79,30 @@ class ListaPedidosSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pedidos
         fields = ['id_pedido', 'situacao', 'cliente', 'data', 'prazo', 'instituicao', 'valor']
+
+
+class PedidoInfoSerializer(serializers.ModelSerializer):
+    nome = serializers.CharField()
+    telefone = serializers.CharField()
+    email = serializers.EmailField()
+    data = serializers.DateField()
+    prazo = serializers.DateField()
+    instituicao = serializers.CharField(allow_null=True)
+
+    class Meta:
+        model = Pedidos
+        fields = ['nome', 'telefone', 'email', 'data', 'prazo', 'instituicao']
+
+
+class PedidoItensSerializer(serializers.ModelSerializer):
+    quantidade = serializers.IntegerField()
+    produto = serializers.CharField()
+    categoria = serializers.CharField()
+    material = serializers.CharField()
+    tamanho = serializers.CharField()
+    observacoes = serializers.CharField()
+    valor = serializers.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        model = ItensPedido
+        fields = ['quantidade', 'produto', 'categoria', 'material', 'tamanho', 'observacoes', 'valor']

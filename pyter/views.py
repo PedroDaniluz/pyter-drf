@@ -76,3 +76,43 @@ class ListaPedidosViewSet(generics.ListAPIView):
         ).order_by('id_pedido')
 
         return queryset
+
+
+class PedidoInfoViewSet(generics.ListAPIView):
+    serializer_class = PedidoInfoSerializer
+
+    def get_queryset(self):
+        id_pedido = self.kwargs.get('id_pedido', None)
+        queryset = Pedidos.objects.annotate(
+            nome=F('id_cliente__nome'),
+            telefone=F('id_cliente__telefone'),
+            email=F('id_cliente__email'),
+            data=F('data_pedido'),
+            prazo=F('data_prazo'),
+            instituicao=F('id_instituicao__nome'),
+        )
+
+        if id_pedido is not None:
+            queryset = queryset.filter(id_pedido = id_pedido)
+
+        return queryset
+
+
+class PedidoItensViewSet(generics.ListAPIView):
+    serializer_class = PedidoItensSerializer
+
+    def get_queryset(self):
+        id_pedido = self.kwargs.get('id_pedido', None)
+        queryset = ItensPedido.objects.annotate(
+            produto=F('id_variacao__id_produto__nome'),
+            categoria=F('id_variacao__id_categoria__nome'),
+            material=F('id_variacao__id_material__nome'),
+            tamanho=F('id_variacao__tamanho'),
+            observacoes=F('id_pedido__observacao'),
+            valor=F('id_variacao__preco') * F('quantidade'),
+        )
+
+        if id_pedido is not None:
+            queryset = queryset.filter(id_pedido = id_pedido)
+
+        return queryset
