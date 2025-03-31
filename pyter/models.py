@@ -55,24 +55,25 @@ class Clientes(models.Model):
 
 class Pedidos(models.Model):
     id_pedido = models.AutoField(primary_key=True)
-    id_cliente = models.ForeignKey(Clientes, models.DO_NOTHING, db_column='id_cliente', null=False, blank=False)
-    id_instituicao = models.ForeignKey(Instituicoes, models.DO_NOTHING, db_column='id_instituicao', null=True, blank=True)
+    id_cliente = models.ForeignKey(Clientes, db_column='id_cliente', on_delete=models.DO_NOTHING, null=False, blank=False)
+    id_instituicao = models.ForeignKey(Instituicoes, db_column='id_instituicao', on_delete=models.DO_NOTHING, null=True, blank=True)
     data_pedido = models.DateField(null=False, blank=False)
     data_prazo = models.DateField(null=False, blank=False)
-    id_situacao = models.ForeignKey(Situacoes, models.DO_NOTHING, db_column='id_situacao', null=False, blank=False)
+    id_situacao = models.ForeignKey(Situacoes, db_column='id_situacao', on_delete=models.DO_NOTHING, null=False, blank=False)
     observacao = models.CharField(max_length=100, blank=True, null=True)
 
 
 class VariacoesProdutos(models.Model):
     id_variacao = models.AutoField(primary_key=True)
-    id_produto = models.ForeignKey(Produtos, models.DO_NOTHING, db_column='id_produto', null=False, blank=False)
-    id_material = models.ForeignKey(Materiais, models.DO_NOTHING, db_column='id_material', null=False, blank=False)
-    id_categoria = models.ForeignKey(Categorias, models.DO_NOTHING, db_column='id_categoria', null=False, blank=False)
+    id_produto = models.ForeignKey(Produtos, db_column='id_produto', on_delete=models.CASCADE, null=False, blank=False)
+    id_material = models.ForeignKey(Materiais, db_column='id_material', on_delete=models.CASCADE, null=False, blank=False)
+    id_categoria = models.ForeignKey(Categorias, db_column='id_categoria', on_delete=models.CASCADE, null=False, blank=False)
     tamanho = models.CharField(max_length=20, null=False, blank=False)
     preco = models.DecimalField(max_digits=5, decimal_places=2, null=False, blank=False)
 
 
 class ItensPedido(models.Model):
-    id_pedido = models.ForeignKey(Pedidos, models.DO_NOTHING, db_column='id_pedido', null=False, blank=False)
-    id_variacao = models.ForeignKey(VariacoesProdutos, models.DO_NOTHING, db_column='id_variacao', null=False, blank=False)
+    id_pedido = models.ForeignKey(Pedidos, db_column='id_pedido', on_delete=models.CASCADE, null=False, blank=False)
+    id_variacao = models.ForeignKey(VariacoesProdutos, db_column='id_variacao', on_delete=models.DO_NOTHING, null=False, blank=False)
     quantidade = models.IntegerField(null=False, blank=False)
+    adicionais = models.JSONField(blank=True, null=True)

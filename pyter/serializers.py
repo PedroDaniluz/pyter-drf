@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import *
+from decimal import Decimal
 
 class CategoriasSerializer(serializers.ModelSerializer):
     class Meta:
@@ -101,8 +102,14 @@ class PedidoItensSerializer(serializers.ModelSerializer):
     material = serializers.CharField()
     tamanho = serializers.CharField()
     observacoes = serializers.CharField()
-    valor = serializers.DecimalField(max_digits=10, decimal_places=2)
+    adicionais = serializers.JSONField()
+    preco_unitario_base = serializers.DecimalField(max_digits=10, decimal_places=2)
+    valor_total = serializers.SerializerMethodField()
 
     class Meta:
         model = ItensPedido
-        fields = ['quantidade', 'produto', 'categoria', 'material', 'tamanho', 'observacoes', 'valor']
+        fields = ['quantidade', 'produto', 'categoria', 'material', 'tamanho', 'observacoes', 'preco_unitario_base', 'adicionais', 'valor_total']
+
+    def get_valor_total(self, obj):
+        adicionais_valor = sum(Decimal(str(adicional.get('valorAdicional', 0))) for adicional in (obj.adicionais or []))
+        return obj.valor + adicionais_valor * Decimal(obj.quantidade)

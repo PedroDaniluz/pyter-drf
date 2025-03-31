@@ -110,6 +110,7 @@ class PedidoItensViewSet(generics.ListAPIView):
             tamanho=F('id_variacao__tamanho'),
             observacoes=F('id_pedido__observacao'),
             valor=F('id_variacao__preco') * F('quantidade'),
+            preco_unitario_base=F('id_variacao__preco')
         )
 
         if id_pedido is not None:
