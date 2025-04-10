@@ -38,15 +38,27 @@ class ClientesSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ItensPedidoSerializer(serializers.ModelSerializer):
+class EnderecosSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ItensPedido
+        model = Enderecos
         fields = '__all__'
 
 
 class PedidosSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pedidos
+        fields = '__all__'
+
+
+class PagamentosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pagamentos
+        fields = '__all__'
+
+
+class ItensPedidoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItensPedido
         fields = '__all__'
 
 
@@ -83,16 +95,23 @@ class ListaPedidosSerializer(serializers.ModelSerializer):
 
 
 class PedidoInfoSerializer(serializers.ModelSerializer):
+    modalidade = serializers.CharField()
+    situacao = serializers.CharField()
+    data_envio = serializers.DateField()
+    data_entrega = serializers.DateField()
+    cod_rastreamento = serializers.CharField()
     nome = serializers.CharField()
     telefone = serializers.CharField()
     email = serializers.EmailField()
     data = serializers.DateField()
     prazo = serializers.DateField()
     instituicao = serializers.CharField(allow_null=True)
+    endereco = serializers.CharField(allow_null=True)
+    
 
     class Meta:
         model = Pedidos
-        fields = ['nome', 'telefone', 'email', 'data', 'prazo', 'instituicao']
+        fields = ['modalidade', 'situacao', 'data', 'prazo', 'data_envio', 'data_entrega', 'cod_rastreamento', 'nome', 'telefone', 'email', 'instituicao', 'endereco']
 
 
 class PedidoItensSerializer(serializers.ModelSerializer):

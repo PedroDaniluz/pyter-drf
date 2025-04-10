@@ -1,8 +1,9 @@
 from .models import *
 from .serializers import *
 from rest_framework import viewsets, generics
-from django.db.models import Sum, F, Value, DecimalField
+from django.db.models import Sum, F, Value, DecimalField, OuterRef, CharField, Subquery
 from django.db.models.functions import Coalesce
+from django.db.models.functions import Concat
 
 
 class CategoriasViewSet(viewsets.ModelViewSet):
@@ -35,15 +36,24 @@ class ClientesViewSet(viewsets.ModelViewSet):
     serializer_class = ClientesSerializer
 
 
-class ItensPedidoViewSet(viewsets.ModelViewSet):
-    queryset = ItensPedido.objects.all()
-    serializer_class = ItensPedidoSerializer
+class EnderecosViewSet(viewsets.ModelViewSet):
+    queryset = Enderecos.objects.all()
+    serializer_class = EnderecosSerializer
 
 
 class PedidosViewSet(viewsets.ModelViewSet):
     queryset = Pedidos.objects.all()
     serializer_class = PedidosSerializer
 
+
+class PagamentosViewSet(viewsets.ModelViewSet):
+    queryset = Pedidos.objects.all()
+    serializer_class = PagamentosSerializer
+
+
+class ItensPedidoViewSet(viewsets.ModelViewSet):
+    queryset = ItensPedido.objects.all()
+    serializer_class = ItensPedidoSerializer
 
 class VariacoesProdutosViewSet(viewsets.ModelViewSet):
     queryset = VariacoesProdutos.objects.all()
@@ -60,11 +70,11 @@ class ListaPedidosViewSet(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = Pedidos.objects.annotate(
-            situacao=F('id_situacao__nome'),
+            situacao=F('id_situacao__situacao'),
             cliente=F('id_cliente__nome'),
             data=F('data_pedido'),
             prazo=F('data_prazo'),
-            instituicao=F('id_instituicao__nome'),
+            instituicao=F('id_instituicao__instituicao'),
             valor=Coalesce(
                 Sum(
                     F('itenspedido__quantidade') * F('itenspedido__id_variacao__preco'),
@@ -83,13 +93,30 @@ class PedidoInfoViewSet(generics.ListAPIView):
 
     def get_queryset(self):
         id_pedido = self.kwargs.get('id_pedido', None)
+        endereco_qs = Enderecos.objects.filter(id_cliente=OuterRef('id_cliente')).annotate(
+            endereco=Concat(
+                F('logradouro'),
+                Value(', '),
+                F('numero'),
+                Value(' - '),
+                F('bairro'),
+                Value(', '),
+                F('cidade'),
+                Value(' - '),
+                F('estado'),
+                output_field=CharField()
+            )
+        ).values('endereco')[:1]
         queryset = Pedidos.objects.annotate(
+            situacao = F('id_situacao__situacao'),
+            cpf=F('id_cliente__cpf'),
             nome=F('id_cliente__nome'),
             telefone=F('id_cliente__telefone'),
             email=F('id_cliente__email'),
             data=F('data_pedido'),
             prazo=F('data_prazo'),
-            instituicao=F('id_instituicao__nome'),
+            instituicao=F('id_instituicao__instituicao'),
+            endereco=Subquery(endereco_qs)
         )
 
         if id_pedido is not None:
@@ -104,9 +131,9 @@ class PedidoItensViewSet(generics.ListAPIView):
     def get_queryset(self):
         id_pedido = self.kwargs.get('id_pedido', None)
         queryset = ItensPedido.objects.annotate(
-            produto=F('id_variacao__id_produto__nome'),
-            categoria=F('id_variacao__id_categoria__nome'),
-            material=F('id_variacao__id_material__nome'),
+            produto=F('id_variacao__id_produto__produto'),
+            categoria=F('id_variacao__id_categoria__categoria'),
+            material=F('id_variacao__id_material__material'),
             tamanho=F('id_variacao__tamanho'),
             observacoes=F('id_pedido__observacao'),
             valor=F('id_variacao__preco') * F('quantidade'),

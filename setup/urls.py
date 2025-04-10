@@ -10,8 +10,10 @@ router.register('situacoes', SituacoesViewSet, basename='situacoes')
 router.register('materiais', MateriaisViewSet, basename='materiais')
 router.register('instituicoes', InstituicoesViewSet, basename='instituicoes')
 router.register('clientes', ClientesViewSet, basename='clientes')
-router.register('itenspedido', ItensPedidoViewSet, basename='itenspedido')
+router.register('enderecos', EnderecosViewSet, basename='enderecos')
 router.register('pedidos', PedidosViewSet, basename='pedidos')
+router.register('pagamentos', PagamentosViewSet, basename='pagamentos')
+router.register('itenspedido', ItensPedidoViewSet, basename='itenspedido')
 router.register('variacoes', VariacoesProdutosViewSet, basename='variacoes')
 
 urlpatterns = [
