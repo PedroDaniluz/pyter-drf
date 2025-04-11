@@ -47,7 +47,7 @@ class PedidosViewSet(viewsets.ModelViewSet):
 
 
 class PagamentosViewSet(viewsets.ModelViewSet):
-    queryset = Pedidos.objects.all()
+    queryset = Pagamentos.objects.all()
     serializer_class = PagamentosSerializer
 
 
@@ -64,7 +64,7 @@ class ListaVariacoesViewSet(generics.ListAPIView):
     queryset = VariacoesProdutos.objects.select_related().all()
     serializer_class = ListaVariacoesSerializer
 
-
+# ALTERAR PROPRIEDADE VALOR - REMOVER CALCULOS E OBTER DADO CONGELADO DE ITENSPEDIDOS
 class ListaPedidosViewSet(generics.ListAPIView):
     serializer_class = ListaPedidosSerializer
 
@@ -125,6 +125,7 @@ class PedidoInfoViewSet(generics.ListAPIView):
         return queryset
 
 
+# ALTERAR PROPRIEDADE VALOR - REMOVER CALCULOS E OBTER DADO CONGELADO DE ITENSPEDIDOS
 class PedidoItensViewSet(generics.ListAPIView):
     serializer_class = PedidoItensSerializer
 
