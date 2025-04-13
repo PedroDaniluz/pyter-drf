@@ -1,6 +1,10 @@
 from .models import *
 from .serializers import *
+from django.db import transaction
 from rest_framework import viewsets, generics
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from django.db.models import Sum, F, Value, DecimalField, OuterRef, CharField, Subquery
 from django.db.models.functions import Coalesce
 from django.db.models.functions import Concat
@@ -138,10 +142,64 @@ class PedidoItensViewSet(generics.ListAPIView):
             tamanho=F('id_variacao__tamanho'),
             observacoes=F('id_pedido__observacao'),
             valor=F('id_variacao__preco') * F('quantidade'),
-            preco_unitario_base=F('id_variacao__preco')
         )
 
         if id_pedido is not None:
             queryset = queryset.filter(id_pedido = id_pedido)
 
         return queryset
+
+
+
+class PedidoCompletoAPIView(APIView):
+    @transaction.atomic
+    def post(self, request):
+        data = request.data
+
+        # Cria cliente (ou recupera pelo CPF)
+        cliente_data = data.get('cliente')
+        cliente, _ = Clientes.objects.update_or_create(
+            cpf=cliente_data['cpf'],
+            defaults={
+                'nome': cliente_data['nome'],
+                'telefone': cliente_data['telefone'],
+                'email': cliente_data.get('email', '')
+            }
+        )
+
+        # Cria pedido
+        pedido_data = data.get('pedido')
+        pedido = Pedidos.objects.create(
+            id_cliente=cliente,
+            id_instituicao_id=pedido_data['id_instituicao'],
+            modalidade=pedido_data.get('modalidade', 'PR'),
+            data_pedido=pedido_data['data_pedido'],
+            data_prazo=pedido_data['data_prazo'],
+            id_situacao_id=pedido_data.get('id_situacao', 1),
+            observacao=pedido_data.get('observacao', ''),
+            valor_total=pedido_data['valor_total'],
+            valor_pago=pedido_data['valor_pago']
+        )
+
+        # Cria itens
+        for item in data.get('itens', []):
+            ItensPedido.objects.create(
+                id_pedido=pedido,
+                id_variacao_id=item['id_variacao'],
+                quantidade=item['quantidade'],
+                adicionais=item.get('adicionais', []),
+                descontos=item.get('descontos'),
+                preco_unitario_base=item['preco_unitario_base']
+            )
+
+        # Cria pagamento
+        pagamento_data = data.get('pagamento')
+        Pagamentos.objects.create(
+            id_pedido=pedido,
+            meio_pagamento=pagamento_data['meio_pagamento'],
+            forma_pagamento=pagamento_data['forma_pagamento'],
+            valor=pagamento_data['valor'],
+            cod_autorizacao=pagamento_data.get('cod_autorizacao', '')
+        )
+
+        return Response({'message': 'Pedido registrado com sucesso!'}, status=status.HTTP_201_CREATED)
