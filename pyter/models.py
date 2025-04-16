@@ -129,6 +129,7 @@ class ItensPedido(models.Model):
     id_pedido = models.ForeignKey(Pedidos, db_column='id_pedido', on_delete=models.CASCADE)
     id_variacao = models.ForeignKey(VariacoesProdutos, db_column='id_variacao', on_delete=models.DO_NOTHING)
     quantidade = models.IntegerField()
+    observacao = models.CharField(max_length=200, blank=True, null=True)
     adicionais = models.JSONField(blank=True, null=True)
     descontos = models.JSONField(blank=True, null=True)
     preco_unitario_base = models.DecimalField(max_digits=10, decimal_places=2) #dado congelado (consistência em consulta futura) - 3FN

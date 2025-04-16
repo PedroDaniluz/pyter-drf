@@ -72,13 +72,13 @@ class VariacoesProdutosSerializer(serializers.ModelSerializer):
 
 
 class ListaVariacoesSerializer(serializers.ModelSerializer):
-    produto = serializers.CharField(source='id_produto')
-    categoria = serializers.CharField(source='id_categoria')
-    material = serializers.CharField(source='id_material')
+    produto = serializers.CharField(source='id_produto.produto')
+    categoria = serializers.CharField(source='id_categoria.categoria')
+    material = serializers.CharField(source='id_material.material')
 
     class Meta:
         model = VariacoesProdutos
-        fields = '__all__'
+        fields = ['produto', 'categoria', 'material', 'tamanho', 'preco']
 
 
 class ListaPedidosSerializer(serializers.ModelSerializer):
@@ -87,11 +87,27 @@ class ListaPedidosSerializer(serializers.ModelSerializer):
     data = serializers.DateField()
     prazo = serializers.DateField()
     instituicao = serializers.CharField(allow_null=True)
-    valor = serializers.DecimalField(max_digits=10, decimal_places=2)
+    valor_total = serializers.SerializerMethodField()
 
     class Meta:
         model = Pedidos
-        fields = ['id_pedido', 'situacao', 'cliente', 'data', 'prazo', 'instituicao', 'valor']
+        fields = ['id_pedido', 'situacao', 'cliente', 'data', 'prazo', 'instituicao', 'valor_total']
+    
+    def get_valor_total(self, obj):
+        total = Decimal('0')
+
+        itens = ItensPedido.objects.filter(id_pedido=obj)
+
+        for item in itens:
+            subtotal = item.preco_unitario_base * item.quantidade
+            adicionais_valor = Decimal('0')
+            if item.adicionais:
+                for adicional in item.adicionais:
+                    valor = Decimal(str(adicional.get('valorAdicional', 0)))
+                    adicionais_valor += valor
+            subtotal += adicionais_valor * item.quantidade
+            total += subtotal
+        return total
 
 
 class PedidoInfoSerializer(serializers.ModelSerializer):
@@ -121,14 +137,14 @@ class PedidoItensSerializer(serializers.ModelSerializer):
     categoria = serializers.CharField()
     material = serializers.CharField()
     tamanho = serializers.CharField()
-    observacoes = serializers.CharField()
+    observacao = serializers.CharField()
     adicionais = serializers.JSONField()
     preco_unitario_base = serializers.DecimalField(max_digits=10, decimal_places=2)
     valor_total = serializers.SerializerMethodField()
 
     class Meta:
         model = ItensPedido
-        fields = ['quantidade', 'produto', 'categoria', 'material', 'tamanho', 'observacoes', 'preco_unitario_base', 'adicionais', 'valor_total']
+        fields = ['quantidade', 'produto', 'categoria', 'material', 'tamanho', 'observacao', 'preco_unitario_base', 'adicionais', 'valor_total']
 
     def get_valor_total(self, obj):
         adicionais_valor = sum(Decimal(str(adicional.get('valorAdicional', 0))) for adicional in (obj.adicionais or []))

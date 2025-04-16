@@ -1,13 +1,12 @@
 from .models import *
 from .serializers import *
 from django.db import transaction
-from rest_framework import viewsets, generics
-from rest_framework import status
+from rest_framework import viewsets, generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models import Sum, F, Value, DecimalField, OuterRef, CharField, Subquery
-from django.db.models.functions import Coalesce
-from django.db.models.functions import Concat
+from django.db.models.functions import Coalesce, Concat
+from collections import defaultdict
 
 
 class CategoriasViewSet(viewsets.ModelViewSet):
@@ -59,16 +58,57 @@ class ItensPedidoViewSet(viewsets.ModelViewSet):
     queryset = ItensPedido.objects.all()
     serializer_class = ItensPedidoSerializer
 
+
 class VariacoesProdutosViewSet(viewsets.ModelViewSet):
     queryset = VariacoesProdutos.objects.all()
     serializer_class = VariacoesProdutosSerializer
 
 
 class ListaVariacoesViewSet(generics.ListAPIView):
-    queryset = VariacoesProdutos.objects.select_related().all()
+    queryset = VariacoesProdutos.objects.select_related('id_produto', 'id_categoria', 'id_material').all()
     serializer_class = ListaVariacoesSerializer
 
-# ALTERAR PROPRIEDADE VALOR - REMOVER CALCULOS E OBTER DADO CONGELADO DE ITENSPEDIDOS
+    def list(self, request):
+        queryset = self.get_queryset()
+        
+        agrupado = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+        
+        for variacao in queryset:
+            id = variacao.id_variacao
+            produto_nome = variacao.id_produto.produto
+            categoria_nome = variacao.id_categoria.categoria
+            material_nome = variacao.id_material.material
+            tamanho = variacao.tamanho
+            preco = variacao.preco
+
+            agrupado[produto_nome][categoria_nome][material_nome].append({
+                'id': id,
+                'tamanho': tamanho,
+                'preco': preco
+            })
+        
+        resultado = []
+        for produto, categorias in agrupado.items():
+            categorias_list = []
+            for categoria, materiais in categorias.items():
+                materiais_list = []
+                for material, variacoes in materiais.items():
+                    materiais_list.append({
+                        'material': material,
+                        'variacoes': variacoes
+                    })
+                categorias_list.append({
+                    'categoria': categoria,
+                    'materiais': materiais_list
+                })
+            resultado.append({
+                'produto': produto,
+                'categorias': categorias_list
+            })
+        
+        return Response(resultado)
+
+
 class ListaPedidosViewSet(generics.ListAPIView):
     serializer_class = ListaPedidosSerializer
 
@@ -81,7 +121,7 @@ class ListaPedidosViewSet(generics.ListAPIView):
             instituicao=F('id_instituicao__instituicao'),
             valor=Coalesce(
                 Sum(
-                    F('itenspedido__quantidade') * F('itenspedido__id_variacao__preco'),
+                    F('itenspedido__quantidade') * F('itenspedido__preco_unitario_base'),
                     output_field=DecimalField(max_digits=10, decimal_places=2)
                 ),
                 Value(0.0),
@@ -129,7 +169,6 @@ class PedidoInfoViewSet(generics.ListAPIView):
         return queryset
 
 
-# ALTERAR PROPRIEDADE VALOR - REMOVER CALCULOS E OBTER DADO CONGELADO DE ITENSPEDIDOS
 class PedidoItensViewSet(generics.ListAPIView):
     serializer_class = PedidoItensSerializer
 
@@ -140,8 +179,7 @@ class PedidoItensViewSet(generics.ListAPIView):
             categoria=F('id_variacao__id_categoria__categoria'),
             material=F('id_variacao__id_material__material'),
             tamanho=F('id_variacao__tamanho'),
-            observacoes=F('id_pedido__observacao'),
-            valor=F('id_variacao__preco') * F('quantidade'),
+            valor=F('preco_unitario_base') * F('quantidade'),
         )
 
         if id_pedido is not None:
@@ -150,13 +188,12 @@ class PedidoItensViewSet(generics.ListAPIView):
         return queryset
 
 
-
+# POST METHODS
 class PedidoCompletoAPIView(APIView):
     @transaction.atomic
     def post(self, request):
         data = request.data
 
-        # Cria cliente (ou recupera pelo CPF)
         cliente_data = data.get('cliente')
         cliente, _ = Clientes.objects.update_or_create(
             cpf=cliente_data['cpf'],
@@ -167,7 +204,6 @@ class PedidoCompletoAPIView(APIView):
             }
         )
 
-        # Cria pedido
         pedido_data = data.get('pedido')
         pedido = Pedidos.objects.create(
             id_cliente=cliente,
@@ -181,7 +217,6 @@ class PedidoCompletoAPIView(APIView):
             valor_pago=pedido_data['valor_pago']
         )
 
-        # Cria itens
         for item in data.get('itens', []):
             ItensPedido.objects.create(
                 id_pedido=pedido,
@@ -192,7 +227,6 @@ class PedidoCompletoAPIView(APIView):
                 preco_unitario_base=item['preco_unitario_base']
             )
 
-        # Cria pagamento
         pagamento_data = data.get('pagamento')
         Pagamentos.objects.create(
             id_pedido=pedido,
