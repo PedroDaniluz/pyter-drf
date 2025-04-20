@@ -111,6 +111,7 @@ class ListaPedidosSerializer(serializers.ModelSerializer):
 
 
 class PedidoInfoSerializer(serializers.ModelSerializer):
+    id_pedido = serializers.IntegerField()
     modalidade = serializers.CharField()
     situacao = serializers.CharField()
     data_envio = serializers.DateField()
@@ -128,7 +129,7 @@ class PedidoInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Pedidos
-        fields = ['modalidade', 'situacao', 'data', 'prazo', 'data_envio', 'data_entrega', 'cod_rastreamento', 'cpf', 'nome', 'telefone', 'email', 'instituicao', 'endereco']
+        fields = ['id_pedido', 'modalidade', 'situacao', 'data', 'prazo', 'data_envio', 'data_entrega', 'cod_rastreamento', 'cpf', 'nome', 'telefone', 'email', 'instituicao', 'endereco']
 
 
 class PedidoItensSerializer(serializers.ModelSerializer):
