@@ -220,11 +220,11 @@ class PedidoCompletoAPIView(APIView):
         pedido = Pedidos.objects.create(
             id_cliente=cliente,
             id_instituicao_id=pedido_data['id_instituicao'],
-            modalidade=pedido_data.get('modalidade', 'PR'),
+            modalidade=pedido_data.get('modalidade', 'Presencial'),
             data_pedido=pedido_data['data_pedido'],
             data_prazo=pedido_data['data_prazo'],
             id_situacao_id=pedido_data.get('id_situacao', 1),
-            observacao=pedido_data.get('observacao', ''),
+            observacao=pedido_data.get('observacao'),
             valor_total=pedido_data['valor_total'],
             valor_pago=pedido_data['valor_pago']
         )
@@ -245,7 +245,7 @@ class PedidoCompletoAPIView(APIView):
             meio_pagamento=pagamento_data['meio_pagamento'],
             forma_pagamento=pagamento_data['forma_pagamento'],
             valor=pagamento_data['valor'],
-            cod_autorizacao=pagamento_data.get('cod_autorizacao', '')
+            cod_autorizacao=pagamento_data.get('cod_autorizacao')
         )
 
         return Response({'message': 'Pedido registrado com sucesso!'}, status=status.HTTP_201_CREATED)
