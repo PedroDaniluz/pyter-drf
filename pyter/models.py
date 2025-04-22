@@ -75,13 +75,13 @@ class Enderecos(models.Model):
 
 class Pedidos(models.Model):
     class Modalidades(models.TextChoices):
-        PRESENCIAL = 'PR', 'Presencial'
-        ONLINE = 'ON', 'Online'
+        PRESENCIAL = 'Presencial', 'Presencial'
+        ONLINE = 'Online', 'Online'
     
     id_pedido = models.AutoField(primary_key=True)
     id_cliente = models.ForeignKey(Clientes, db_column='id_cliente', on_delete=models.DO_NOTHING)
     id_instituicao = models.ForeignKey(Instituicoes, db_column='id_instituicao', on_delete=models.DO_NOTHING, null=True, blank=True)
-    modalidade = models.CharField(max_length=2, choices=Modalidades.choices, default=Modalidades.PRESENCIAL)
+    modalidade = models.CharField(max_length=20, choices=Modalidades.choices, default=Modalidades.PRESENCIAL)
     data_pedido = models.DateField()
     data_prazo = models.DateField()
     id_situacao = models.ForeignKey(Situacoes, db_column='id_situacao', on_delete=models.DO_NOTHING)
@@ -114,6 +114,7 @@ class Pagamentos(models.Model):
     valor = models.DecimalField(max_digits=10, decimal_places=2)
     data_pagamento = models.DateField(default=timezone.now)
     cod_autorizacao = models.CharField(max_length=50, null=True, blank=True)
+    parcelas = models.IntegerField(null=False, blank=False, default=1)
 
 
 class VariacoesProdutos(models.Model):

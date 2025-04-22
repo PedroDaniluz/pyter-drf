@@ -150,3 +150,17 @@ class PedidoItensSerializer(serializers.ModelSerializer):
     def get_valor_total(self, obj):
         adicionais_valor = sum(Decimal(str(adicional.get('valorAdicional', 0))) for adicional in (obj.adicionais or []))
         return obj.valor + adicionais_valor * Decimal(obj.quantidade)
+
+
+class PedidoPagamentoSerializer(serializers.ModelSerializer):
+    id_pagamento = serializers.IntegerField()
+    data_pagamento = serializers.DateField()
+    valor = serializers.DecimalField(max_digits=10, decimal_places=2)
+    forma_pagamento = serializers.CharField()
+    meio_pagamento = serializers.CharField()
+    parcelas = serializers.IntegerField()
+    cod_autorizacao = serializers.CharField()
+
+    class Meta:
+        model = Pagamentos
+        fields = ['id_pagamento', 'data_pagamento', 'valor', 'forma_pagamento', 'meio_pagamento', 'parcelas', 'cod_autorizacao']

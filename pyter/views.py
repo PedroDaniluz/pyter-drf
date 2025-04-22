@@ -188,6 +188,18 @@ class PedidoItensViewSet(generics.ListAPIView):
         return queryset
 
 
+class PedidoPagamentoViewSet(generics.ListAPIView):
+    serializer_class = PedidoPagamentoSerializer
+    def get_queryset(self):
+        id_pedido = self.kwargs.get('id_pedido', None)
+        queryset = Pagamentos.objects.all()
+
+        if id_pedido is not None:
+            queryset = queryset.filter(id_pedido = id_pedido)
+
+        return queryset
+
+
 # POST METHODS
 class PedidoCompletoAPIView(APIView):
     @transaction.atomic

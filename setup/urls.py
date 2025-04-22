@@ -23,5 +23,6 @@ urlpatterns = [
     path('lista-pedidos/', ListaPedidosViewSet.as_view(), name='lista-pedidos'),
     path('pedido-info/<int:id_pedido>/', PedidoInfoViewSet.as_view(), name='pedido-info'),
     path('pedido-itens/<int:id_pedido>/', PedidoItensViewSet.as_view(), name='pedido-itens'),
+    path('pedido-pagamentos/<int:id_pedido>/', PedidoPagamentoViewSet.as_view(), name='pedido-pagamentos'),
     path('registrar-pedido/', PedidoCompletoAPIView.as_view(), name='registrar-pedido'),
 ]
