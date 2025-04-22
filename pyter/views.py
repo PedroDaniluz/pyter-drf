@@ -212,7 +212,7 @@ class PedidoCompletoAPIView(APIView):
             defaults={
                 'nome': cliente_data['nome'],
                 'telefone': cliente_data['telefone'],
-                'email': cliente_data.get('email', '')
+                'email': cliente_data.get('email')
             }
         )
 
